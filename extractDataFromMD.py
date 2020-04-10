@@ -52,7 +52,7 @@ def getLogos(EntityDescriptor,namespaces,entType='idp'):
     return logos_list
 
 # Get ServiceName
-def getServiceName(EntityDescriptor,namespaces,lang='it'):
+def getServiceName(EntityDescriptor,namespaces):
     serviceName = EntityDescriptor.find("./md:SPSSODescriptor/md:AttributeConsumingService/md:ServiceName[@xml:lang='it']", namespaces)
     if (serviceName != None):
        return serviceName.text
@@ -77,7 +77,7 @@ def getOrgName(EntityDescriptor, namespaces):
        else:
           return ""
 
-# Gen InformationURL
+# Get Information Page URL
 def getInformationURL(EntityDescriptor,namespaces):
     info = EntityDescriptor.find("./md:SPSSODescriptor/md:Extensions/mdui:UIInfo/mdui:InformationURL[@xml:lang='it']",namespaces)
     if (info != None):
@@ -87,15 +87,37 @@ def getInformationURL(EntityDescriptor,namespaces):
        if (info != None):
           return info.text
        else:
-          info = EntityDescriptor.find("./md:Organization/md:OrganizationURL[@xml:lang='it']",namespaces)
-          if (info != None):
-             return info.text
-          else:
-              info = EntityDescriptor.find("./md:Organization/md:OrganizationURL[@xml:lang='en']",namespaces)
-              if (info != None):
-                 return info.text
-              else:
-                 return ""
+          return ""
+
+
+# Get Organization page URL
+def getOrganizationURL(EntityDescriptor,namespaces):
+
+    orgUrl = EntityDescriptor.find("./md:Organization/md:OrganizationURL[@xml:lang='it']",namespaces)
+    if (orgUrl != None):
+       return orgUrl.text
+    else:
+       orgUrl = EntityDescriptor.find("./md:Organization/md:OrganizationURL[@xml:lang='en']",namespaces)
+       if (orgUrl != None):
+          return orgUrl.text
+       else:
+          return ""
+
+
+# Get RequestedAttribute
+def getRequestedAttribute(EntityDescriptor,namespaces):
+    reqAttr = EntityDescriptor.findall("./md:SPSSODescriptor/md:AttributeConsumingService/md:RequestedAttribute", namespaces)
+
+    requestedAttributes = list()
+
+    if (reqAttr != None):
+       for ra in reqAttr:
+           if (ra.get('isRequired') == "true"):
+              requestedAttributes.append(ra.get('FriendlyName')+"(O)")
+           else:
+              requestedAttributes.append(ra.get('FriendlyName')+"(R)")
+
+    return requestedAttributes
 
 
 def main(argv):
@@ -174,7 +196,7 @@ def main(argv):
       entityID = getEntityID(EntityDescriptor,namespaces)
 
       # Get ServiceName ENG
-      serviceName = getServiceName(EntityDescriptor,namespaces,'en')
+      serviceName = getServiceName(EntityDescriptor,namespaces)
 
       # Get MDUI Privacy Policy
       #pp_list = getPrivacyStatementURLs(EntityDescriptor,namespaces,'idp')
@@ -182,9 +204,12 @@ def main(argv):
       #if (len(pp_list) != 0):
       #   pp_flag = 'Privacy Policy presente'
 
-      # Get MDUI Info Page
-      infoUrl = getInformationURL(EntityDescriptor,namespaces)
-     
+      # Get SP Information Page
+      #infoUrl = getInformationURL(EntityDescriptor,namespaces)
+
+      # Get Organization Page     
+      orgUrl = getOrganizationURL(EntityDescriptor,namespaces)
+
       # Get MDUI Logos
       #logos_list = getLogos(EntityDescriptor,namespaces,'sp')
 
@@ -192,15 +217,7 @@ def main(argv):
       #   logo_flag = 'Logo presente'
 
       # Get RequestedAttribute
-      reqAttr = EntityDescriptor.findall("./md:SPSSODescriptor/md:AttributeConsumingService/md:RequestedAttribute", namespaces)
-      requestedAttributes = list()
-
-      if (reqAttr != None):
-         for ra in reqAttr:
-            if(ra.get('isRequired') == "true"):
-               requestedAttributes.append(ra.get('FriendlyName')+"(O)")
-            else:
-               requestedAttributes.append(ra.get('FriendlyName')+"(R)")
+      requestedAttributes = getRequestedAttribute(EntityDescriptor,namespaces)
 
       #Get Organization Name
       orgName = getOrgName(EntityDescriptor,namespaces)
@@ -208,7 +225,7 @@ def main(argv):
       sp = OrderedDict([
         ('id',cont_id),
         ('IdemResource_name',serviceName),
-        ('IdemResource_serviceUrlOne', infoUrl),
+        ('IdemResource_serviceUrlOne', orgUrl),
         ('IdemResource_uri',', '.join(requestedAttributes)),
         ('IdemAccession_name',orgName)
       ])
@@ -217,7 +234,7 @@ def main(argv):
 
    
    result_sps = open(outputfile, "w",encoding=None)
-   result_sps.write(json.dumps(sorted(list_sps,key=itemgetter('id')),sort_keys=False, indent=4, ensure_ascii=False))
+   result_sps.write(json.dumps(sorted(list_sps,key=itemgetter('id')),sort_keys=False, indent=None, ensure_ascii=False,separators=(',', ':')))
    result_sps.close()
 
 
