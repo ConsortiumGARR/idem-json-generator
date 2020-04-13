@@ -17,17 +17,17 @@ Small python3 script that converts Metadata XML to DiscoFeed JSON format for Shi
     * IDEM Production Metadata:
       * `/usr/bin/wget http://md.idem.garr.it/metadata/idem-metadata-sha256.xml -O /opt/idem-json-generator/input/idem-metadata-sha256.xml >> /opt/idem-json-generator/wget.log 2>&1`
 
-  * Use one of the following commands to generate EDS JSON file for the specific stream:
+  * Use one of the following commands to generate EDS JSON files `idem-resources.json` & `idem-idps.json` for the specific stream:
     * IDEM Test Metadata:
-      * `/usr/bin/python3 /opt/idem-json-generator/extractDataFromMD.py -m /opt/idem-json-generator/input/idem-test-metadata-sha256.xml -o /opt/idem-json-generator/output/idem-resources.json > /opt/idem-json-generator/md-parsing.log 2>&1`
+      * `/usr/bin/python3 /opt/idem-json-generator/extractDataFromMD.py -m /opt/idem-json-generator/input/idem-test-metadata-sha256.xml -o /opt/idem-json-generator/output > /opt/idem-json-generator/idem-json-generator.log 2>&1`
     * IDEM Production Metadata:
-      * `/usr/bin/python3 /opt/idem-json-generator/extractDataFromMD.py -m /opt/idem-json-generator/input/idem-metadata-sha256.xml -o /opt/idem-json-generator/output/idem-resources.json > /opt/idem-json-generator/md-parsing.log 2>&1`
+      * `/usr/bin/python3 /opt/idem-json-generator/extractDataFromMD.py -m /opt/idem-json-generator/input/idem-metadata-sha256.xml -o /opt/idem-json-generator/output > /opt/idem-json-generator/idem-json-generator.log 2>&1`
 
   Example Crontab:
   ```bash
   20 * * * * /usr/bin/wget http://md.idem.garr.it/metadata/idem-metadata-sha256.xml -O /opt/idem-json-generator/input/idem-metadata-sha256.xml >> /opt/idem-json-generator/wget.log 2>&1
 
-  21 * * * * /usr/bin/python3 /opt/idem-json-generator/extractDataFromMD.py -m /opt/idem-json-generator/input/idem-metadata-sha256.xml -o /opt/idem-json-generator/output/idem-resources.json > /opt/idem-json-generator/md-parsing.log 2>&1
+  21 * * * * /usr/bin/python3 /opt/idem-json-generator/extractDataFromMD.py -m /opt/idem-json-generator/input/idem-metadata-sha256.xml -o /opt/idem-json-generator/output > /opt/idem-json-generator/idem-json-generator.log 2>&1
   ```
 
 * Enable IDEM JSON Generator site:
