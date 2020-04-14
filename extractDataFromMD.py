@@ -173,7 +173,6 @@ def getOrgName(EntityDescriptor, namespaces):
 
 # Get DisplayName
 def getDisplayName(EntityDescriptor, namespaces, entType='idp'):
-
     entityType = ""
     if (entType.lower() == 'idp'):
        entityType = "./md:IDPSSODescriptor"
@@ -208,16 +207,20 @@ def getInformationURLs(EntityDescriptor,namespaces,entType='idp'):
     if (entType.lower() == 'sp'):
        entityType = "./md:SPSSODescriptor"
 
-    info_list = list()
     info_pages = EntityDescriptor.findall("%s/md:Extensions/mdui:UIInfo/mdui:InformationURL" % entityType, namespaces)
 
+    info_dict = dict()
     for infop in info_pages:
-        info_dict = dict()
         lang = infop.get("{http://www.w3.org/XML/1998/namespace}lang")
         info_dict[lang] = infop.text
-        info_list.append(info_dict)
 
-    return info_list
+    if ('it' not in info_dict):
+       info_dict['it'] = ""
+
+    if ('en' not in info_dict):
+       info_dict['en'] = ""
+
+    return info_dict
 
 
 # Get MDUI PrivacyStatementURLs
@@ -228,59 +231,23 @@ def getPrivacyStatementURLs(EntityDescriptor,namespaces,entType='idp'):
     if (entType.lower() == 'sp'):
        entityType = "./md:SPSSODescriptor"
 
-    privacy_list = list()
     privacy_pages = EntityDescriptor.findall("%s/md:Extensions/mdui:UIInfo/mdui:PrivacyStatementURL" % entityType, namespaces)
 
+    privacy_dict = dict()
     for pp in privacy_pages:
-        privacy_dict = dict()
         lang = pp.get("{http://www.w3.org/XML/1998/namespace}lang")
         privacy_dict[lang] = pp.text
-        privacy_list.append(privacy_dict)
 
-    return privacy_list
+    if ('it' not in privacy_dict):
+       privacy_dict['it'] = ""
 
+    if ('en' not in privacy_dict):
+       privacy_dict['en'] = ""
 
-# Gen InformationURL
-def getInformationURL(EntityDescriptor,namespaces,entType='sp'):
-
-    entityType = ""
-    if (entType.lower() == 'idp'):
-       entityType = "./md:IDPSSODescriptor"
-    if (entType.lower() == 'sp'):
-       entityType = "./md:SPSSODescriptor"
-
-    info = EntityDescriptor.find("%s/md:Extensions/mdui:UIInfo/mdui:InformationURL[@xml:lang='it']" % entityType,namespaces)
-    if (info != None):
-       return info.text
-    else:
-       info = EntityDescriptor.find("%s/md:Extensions/mdui:UIInfo/mdui:InformationURL[@xml:lang='en']" % entityType,namespaces)
-       if (info != None):
-          return info.text
-       else:
-          return ""
+    return privacy_dict
 
 
-# Gen PrivacyStatementURL
-def getPrivacyStatementURL(EntityDescriptor,namespaces,entType='sp'):
-
-    entityType = ""
-    if (entType.lower() == 'idp'):
-       entityType = "./md:IDPSSODescriptor"
-    if (entType.lower() == 'sp'):
-       entityType = "./md:SPSSODescriptor"
-
-    info = EntityDescriptor.find("%s/md:Extensions/mdui:UIInfo/mdui:PrivacyStatementURL[@xml:lang='it']" % entityType,namespaces)
-    if (info != None):
-       return info.text
-    else:
-       info = EntityDescriptor.find("%s/md:Extensions/mdui:UIInfo/mdui:PrivacyStatementeURL[@xml:lang='en']" % entityType,namespaces)
-       if (info != None):
-          return info.text
-       else:
-          return ""
-
-
-# GET OrganizationURL
+# Get OrganizationURL
 def getOrganizationURL(EntityDescriptor,namespaces):
     orgUrl = EntityDescriptor.find("./md:Organization/md:OrganizationURL[@xml:lang='it']",namespaces)
     if (orgUrl != None):
@@ -307,6 +274,7 @@ def getRequestedAttribute(EntityDescriptor,namespaces):
               requestedAttributes.append(ra.get('FriendlyName')+"(R)")
 
     return requestedAttributes
+
 
 # Get Contacts
 def getContacts(EntityDescriptor,namespaces,contactType='technical'):
@@ -397,6 +365,16 @@ def main(argv):
 
    cont_id = 0
 
+   # JSON SP Output:
+   # [
+   #  {
+   #   "id": 1,
+   #   "IdemResource_name": "XploreUAT Digital Library Explorer test SP provided by IEEE",
+   #   "IdemResource_serviceUrlOne": "http://xploreuat.ieee.org/",
+   #   "IdemResource_uri": "eduPersonTargetedID(O), eduPersonScopedAffiliation(O)",
+   #   "IdemAccession_name": "IEEE"
+   #  },
+   # ]
    for EntityDescriptor in sp:
 
       cont_id = cont_id + 1
@@ -404,8 +382,7 @@ def main(argv):
       # Get entityID
       entityID = getEntityID(EntityDescriptor,namespaces)
 
-      # Get ServiceName ENG
-      #serviceName = getServiceName(EntityDescriptor,namespaces)
+      # Get ServiceName
       serviceName = getDisplayName(EntityDescriptor,namespaces,'sp')
 
       # Get Organization Page
@@ -434,29 +411,29 @@ def main(argv):
 
    cont_id = 0
 
-   # JSON Output:
+   # JSON IdP Output:
    # [ 
    #  {
+   #    "id":"<id>",
    #    "entityID": "<entityID>",
    #    "orgName": "<nomeOrg>",
    #    "orgURL": "urlOrg",
    #    "logo": "logoOrg",
-   #    "contacts": [
-   #                  { "technical" : "<email-tecnichal>" },
-   #                  { "support" : "<email-support>" },
-   #                  { "administrative" : "<email-administr>" }
-   #                ],
-   #    "info": [
-   #              { "it" : "<informationUrl-italiana.html>" },
-   #              { "en" : "<informationUrl-inglese.html>" },
-   #            ],
-   #    "privacy": [
-   #                 { "it" : "<privacyUrl-italiana.html>" },
-   #                 { "en" : "<privacyUrl-inglese.html>" },
-   #               ],
+   #    "contacts": {
+   #                  "technical" : ["<email-tecnichal>"],
+   #                  "support" : ["<email-support>"],
+   #                  "administrative" : ["<email-administr>"]
+   #                },
+   #    "info": { 
+   #              "it" : "<informationUrl-italiana.html>",
+   #              "en" : "<informationUrl-inglese.html>",
+   #            },
+   #    "privacy": {
+   #                 "it" : "<privacyUrl-italiana.html>",
+   #                 "en" : "<privacyUrl-inglese.html>",
+   #               },
    #  } 
    # ] 
-
    for EntityDescriptor in idp:
 
       cont_id = cont_id + 1
@@ -486,10 +463,10 @@ def main(argv):
 
       # Get InformationURL
       info = getInformationURLs(EntityDescriptor, namespaces, 'idp')
-      
+
       # Get PrivacyStatementURL
-      privacy = getPrivacyStatementURLs(EntityDescriptor, namespaces, 'idp')
-      
+      privacy = getPrivacyStatementURL(EntityDescriptor, namespaces, 'idp')
+
       idp = OrderedDict([
         ('id',cont_id),
         ('entityID',entityID),
