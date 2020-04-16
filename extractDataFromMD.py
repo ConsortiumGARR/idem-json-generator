@@ -158,17 +158,13 @@ def getServiceName(EntityDescriptor,namespaces):
 
 
 # Get Organization Name
-def getOrgName(EntityDescriptor, namespaces):
-    orgName = EntityDescriptor.find("./md:Organization/md:OrganizationName[@xml:lang='it']",namespaces)
+def getOrganizationName(EntityDescriptor, namespaces,lang='it'):
+    orgName = EntityDescriptor.find("./md:Organization/md:OrganizationName[@xml:lang='%s']" % lang,namespaces)
 
     if (orgName != None):
        return orgName.text
     else:
-       orgName = EntityDescriptor.find("./md:Organization/md:OrganizationName[@xml:lang='en']",namespaces)
-       if (orgName != None):
-          return orgName.text
-       else:
-          return ""
+       return ""
 
 
 # Get DisplayName
@@ -179,24 +175,24 @@ def getDisplayName(EntityDescriptor, namespaces, entType='idp'):
     if (entType.lower() == 'sp'):
        entityType = "./md:SPSSODescriptor"
 
-    orgName = EntityDescriptor.find("%s/md:Extensions/mdui:DisplayName[@xml:lang='it']" % entityType,namespaces)
+    displayName = EntityDescriptor.find("%s/md:Extensions/mdui:DisplayName[@xml:lang='it']" % entityType,namespaces)
 
-    if (orgName != None):
-       return orgName.text
+    if (displayName != None):
+       return displayName.text
     else:
-       orgName = EntityDescriptor.find("%s/md:Extensions/mdui:DisplayName[@xml:lang='en']" % entityType,namespaces)
-       if (orgName != None):
-          return orgName.text
+       displayName = EntityDescriptor.find("%s/md:Extensions/mdui:DisplayName[@xml:lang='en']" % entityType,namespaces)
+       if (displayName != None):
+          return displayName.text
        else:
           if (entType == 'sp'):
-             orgName = getServiceName(EntityDescriptor,namespaces)
-             if (orgName != None):
-                return orgName
+             displayName = getServiceName(EntityDescriptor,namespaces)
+             if (displayName != None):
+                return displayName
              else:
                 return ""
           else:
-             orgName = getOrgName(EntityDescriptor,namespaces)
-             return orgName
+             displayName = getOrganizationName(EntityDescriptor,namespaces)
+             return displayName
 
     
 # Get MDUI InformationURLs
@@ -248,30 +244,32 @@ def getPrivacyStatementURLs(EntityDescriptor,namespaces,entType='idp'):
 
 
 # Get OrganizationURL
-def getOrganizationURL(EntityDescriptor,namespaces):
-    orgUrl = EntityDescriptor.find("./md:Organization/md:OrganizationURL[@xml:lang='it']",namespaces)
+def getOrganizationURL(EntityDescriptor,namespaces,lang='it'):
+    orgUrl = EntityDescriptor.find("./md:Organization/md:OrganizationURL[@xml:lang='%s']" % lang,namespaces)
+
     if (orgUrl != None):
        return orgUrl.text
     else:
-       orgUrl = EntityDescriptor.find("./md:Organization/md:OrganizationURL[@xml:lang='en']",namespaces)
-       if (orgUrl != None):
-          return orgUrl.text
-       else:
-          return ""
+       return ""
 
 
 # Get RequestedAttribute
 def getRequestedAttribute(EntityDescriptor,namespaces):
     reqAttr = EntityDescriptor.findall("./md:SPSSODescriptor/md:AttributeConsumingService/md:RequestedAttribute", namespaces)
 
-    requestedAttributes = list()
+    requireList = list()
+    requestedList = list()
+    requestedAttributes = dict()
 
     if (len(reqAttr) != 0):
        for ra in reqAttr:
            if (ra.get('isRequired') == "true"):
-              requestedAttributes.append(ra.get('FriendlyName')+"(O)")
+              requireList.append(ra.get('FriendlyName'))
            else:
-              requestedAttributes.append(ra.get('FriendlyName')+"(R)")
+              requestedList.append(ra.get('FriendlyName'))
+
+    requestedAttributes['required'] = requireList
+    requestedAttributes['requested'] = requestedList
 
     return requestedAttributes
 
@@ -290,12 +288,11 @@ def getContacts(EntityDescriptor,namespaces,contactType='technical'):
     if (len(contacts) != 0):
        for ctc in contacts:
            if ctc.text.startswith("mailto:"):
-              contactsList.append(ctc.text)
+              contactsList.append(ctc.text.replace("mailto:", ""))
            else:
-              contactsList.append("mailto:" + ctc.text)
               contactList.append(ctc.text)
 
-    return contactsList
+    return '<br/>'.join(contactsList)
 
 
 def main(argv):
@@ -367,48 +364,113 @@ def main(argv):
 
    # JSON SP Output:
    # [
-   #  {
-   #   "id": 1,
-   #   "IdemResource_name": "XploreUAT Digital Library Explorer test SP provided by IEEE",
-   #   "IdemResource_serviceUrlOne": "http://xploreuat.ieee.org/",
-   #   "IdemResource_uri": "eduPersonTargetedID(O), eduPersonScopedAffiliation(O)",
-   #   "IdemAccession_name": "IEEE"
-   #  },
+   #   {
+   #     "id": #_number_#,
+   #     "resourceName": "#_resource-display-name_#",
+   #     "resourceProvider": "#_organization-name-linked_#",
+   #     "resourceAttributes": {
+   #        "required": [
+   #                      "eduPersonPrincipalName",
+   #                      "email",
+   #                      "givenName",
+   #                      "surname"
+   #                    ],
+   #        "requested": []
+   #     },
+   #     "entityID": "#_entityID-resource_#",
+   #     "resourceContacts": {
+   #        "technical": [
+   #                       "#_email-address-list_#"
+   #                     ],
+   #        "support": [],
+   #        "administrative": []
+   #     },
+   #     "info": "<a href='#_info-url-it_#'>IT</a>, <a href='#_info-url-en_#'>EN</a>",
+   #     "privacy": "<a href='#_privacy-url-it_#'>IT</a>, <a href='#_privacy-url-en_#'>EN</a>"
+   #   }
    # ]
    for EntityDescriptor in sp:
 
       cont_id = cont_id + 1
+      info = ""
+      privacy = ""
 
       # Get entityID
       entityID = getEntityID(EntityDescriptor,namespaces)
 
+      # Get InformationURL
+      infoDict = getInformationURLs(EntityDescriptor, namespaces, 'sp')
+
+      # Get PrivacyStatementURL
+      privacyDict = getPrivacyStatementURLs(EntityDescriptor, namespaces, 'sp')
+
       # Get ServiceName
       serviceName = getDisplayName(EntityDescriptor,namespaces,'sp')
 
-      # Get Organization Page
-      orgUrl = getOrganizationURL(EntityDescriptor,namespaces)
-     
+      # Build Resource Info Pages
+      if (infoDict['it'] != "" and infoDict['en'] != ""):
+         info = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>&nbsp;&nbsp;&nbsp;<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (infoDict['it'],infoDict['en'])
+      elif (infoDict['it'] != "" and infoDict['en'] == ""):
+         info = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>" % (infoDict['it'])
+      elif (infoDict['it'] == "" and infoDict['en'] != ""):
+         info = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (infoDict['en'])
+
+      # Build Resource Privacy Pages
+      if (privacyDict['it'] != "" and privacyDict['en'] != ""):
+         privacy = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>&nbsp;&nbsp;&nbsp;<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (privacyDict['it'],privacyDict['en'])
+      elif (privacyDict['it'] != "" and privacyDict['en'] == ""):
+         privacy = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>" % (privacyDict['it'])
+      elif (privacyDict['it'] == "" and privacyDict['en'] != ""):
+         privacy = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (privacyDict['en'])
+
       # Get Requested Attributes
       requestedAttributes = getRequestedAttribute(EntityDescriptor,namespaces)
 
       # Get Organization Name
-      orgName = getOrgName(EntityDescriptor,namespaces)
 
+      orgName = getOrganizationName(EntityDescriptor,namespaces,'it')
+      if (orgName == ""):
+         orgName = getOrganizationName(EntityDescriptor,namespaces,'en')
+
+      # Get Organization Page
+      orgUrl = getOrganizationURL(EntityDescriptor,namespaces,'it')
+      if (orgUrl == ""):
+         orgUrl = getOrganizationURL(EntityDescriptor,namespaces,'en')
+     
+      orgName = "<a href='%s' target='_blank'>%s</a>" % (orgUrl,orgName)
+
+      # Get Contacts
+      techContacts = getContacts(EntityDescriptor, namespaces, 'technical')
+      suppContacts = getContacts(EntityDescriptor, namespaces, 'support')
+      adminContacts = getContacts(EntityDescriptor, namespaces, 'administrative')
+
+      contacts = OrderedDict([
+         ('technical', techContacts),
+         ('support', suppContacts),
+         ('administrative', adminContacts),
+      ])
+
+      # Build SP JSON Dictionary
       sp = OrderedDict([
         ('id',cont_id),
-        ('IdemResource_name',serviceName),
-        ('IdemResource_serviceUrlOne', orgUrl),
-        ('IdemResource_uri',', '.join(requestedAttributes)),
-        ('IdemAccession_name',orgName)
-      ])
+        ('resourceName',serviceName),
+        ('resourceProvider', orgName),
+        ('resourceAttributes',requestedAttributes),
+        ('entityID',entityID),
+        ('resourceContacts',contacts),
+        ('info', info),
+        ('privacy', privacy)
+      ])     
 
       list_sps.append(sp)
 
-   
-   result_sps = open("%s/idem-resources.json" % outputpath, "w",encoding=None)
+   result_sps = open("%s/idem-sps.json" % outputpath, "w",encoding=None)
    result_sps.write(json.dumps(sorted(list_sps,key=itemgetter('id')),sort_keys=False, indent=None, ensure_ascii=False,separators=(',', ':')))
    result_sps.close()
 
+
+   info = ""
+   privacy = ""
    cont_id = 0
 
    # JSON IdP Output:
@@ -416,22 +478,16 @@ def main(argv):
    #  {
    #    "id":"<id>",
    #    "entityID": "<entityID>",
-   #    "orgName": "<nomeOrg>",
-   #    "orgURL": "urlOrg",
-   #    "logo": "logoOrg",
+   #    "orgName": "<nomeOrgLinked>",
    #    "contacts": {
    #                  "technical" : ["<email-tecnichal>"],
    #                  "support" : ["<email-support>"],
    #                  "administrative" : ["<email-administr>"]
    #                },
-   #    "info": { 
-   #              "it" : "<informationUrl-italiana.html>",
-   #              "en" : "<informationUrl-inglese.html>",
-   #            },
-   #    "privacy": {
-   #                 "it" : "<privacyUrl-italiana.html>",
-   #                 "en" : "<privacyUrl-inglese.html>",
-   #               },
+   #    "info": "<informationUrls>",
+   #    "privacy": "<privacyUrls>",
+   #    "favicon": "<faviconUrl>",
+   #    "logo": "<logoUrl>",
    #  } 
    # ] 
    for EntityDescriptor in idp:
@@ -444,11 +500,18 @@ def main(argv):
       # Get DisplayName
       orgName = getDisplayName(EntityDescriptor, namespaces, 'idp')
 
-      # Get OrganizationURL
-      orgUrl = getOrganizationURL(EntityDescriptor,namespaces)
+      # Get Organization Page
+      orgUrl = getOrganizationURL(EntityDescriptor,namespaces,'it')
+      if (orgUrl == ""):
+         orgUrl = getOrganizationURL(EntityDescriptor,namespaces,'en')
+     
+      orgName = "<a href='%s' target='_blank'>%s</a>" % (orgUrl,orgName)
 
       # Get Logo URL
-      logoUrl = getLogoBig(EntityDescriptor, namespaces, 'idp')
+      logo = getLogoBig(EntityDescriptor, namespaces, 'idp')
+
+      # Get Favicon URL
+      favicon = getLogoSmall(EntityDescriptor, namespaces, 'idp')
 
       # Get Contacts
       techContacts = getContacts(EntityDescriptor, namespaces, 'technical')
@@ -462,20 +525,37 @@ def main(argv):
       ])
 
       # Get InformationURL
-      info = getInformationURLs(EntityDescriptor, namespaces, 'idp')
+      infoDict = getInformationURLs(EntityDescriptor, namespaces, 'idp')
 
       # Get PrivacyStatementURL
-      privacy = getPrivacyStatementURL(EntityDescriptor, namespaces, 'idp')
+      privacyDict = getPrivacyStatementURLs(EntityDescriptor, namespaces, 'idp')
+
+      # Build Resource Info Pages
+      if (infoDict['it'] != "" and infoDict['en'] != ""):
+         info = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>&nbsp;&nbsp;&nbsp;<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (infoDict['it'],infoDict['en'])
+      elif (infoDict['it'] != "" and infoDict['en'] == ""):
+         info = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>" % (infoDict['it'])
+      elif (infoDict['it'] == "" and infoDict['en'] != ""):
+         info = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (infoDict['en'])
+
+      # Build Resource Privacy Pages
+      if (privacyDict['it'] != "" and privacyDict['en'] != ""):
+         privacy = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>&nbsp;&nbsp;&nbsp;<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (privacyDict['it'],privacyDict['en'])
+      elif (privacyDict['it'] != "" and privacyDict['en'] == ""):
+         privacy = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>" % (privacyDict['it'])
+      elif (privacyDict['it'] == "" and privacyDict['en'] != ""):
+         privacy = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (privacyDict['en'])
+
 
       idp = OrderedDict([
         ('id',cont_id),
         ('entityID',entityID),
         ('orgName', orgName),
-        ('orgUrl', orgUrl),
-        ('logo', logoUrl),
         ('contacts', contacts),
         ('info', info),
-        ('privacy', privacy)
+        ('privacy', privacy),
+        ('favicon', favicon),
+        ('logo', logo)
       ])
 
       list_idps.append(idp)
