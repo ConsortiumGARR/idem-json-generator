@@ -280,9 +280,9 @@ def getContacts(EntityDescriptor,namespaces,contactType='technical'):
 
     if (contactType.lower() == 'technical'):
        contacts = EntityDescriptor.findall("./md:ContactPerson[@contactType='technical']/md:EmailAddress", namespaces)
-    if (contactType.lower() == 'support'):
+    elif (contactType.lower() == 'support'):
        contacts = EntityDescriptor.findall("./md:ContactPerson[@contactType='support']/md:EmailAddress", namespaces)
-    if (contactType.lower() == 'administrative'):
+    elif (contactType.lower() == 'administrative'):
        contacts = EntityDescriptor.findall("./md:ContactPerson[@contactType='administrative']/md:EmailAddress", namespaces)
 
     if (len(contacts) != 0):
@@ -414,6 +414,8 @@ def main(argv):
          info = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>" % (infoDict['it'])
       elif (infoDict['it'] == "" and infoDict['en'] != ""):
          info = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (infoDict['en'])
+      elif (infoDict['it'] == infoDict['en'] == ""):
+         info = ""
 
       # Build Resource Privacy Pages
       if (privacyDict['it'] != "" and privacyDict['en'] != ""):
@@ -422,6 +424,8 @@ def main(argv):
          privacy = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>" % (privacyDict['it'])
       elif (privacyDict['it'] == "" and privacyDict['en'] != ""):
          privacy = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (privacyDict['en'])
+      elif (privacyDict['it'] == privacyDict['en'] == ""):
+         privacy = ""
 
       # Get Requested Attributes
       requestedAttributes = getRequestedAttribute(EntityDescriptor,namespaces)
@@ -537,6 +541,8 @@ def main(argv):
          info = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>" % (infoDict['it'])
       elif (infoDict['it'] == "" and infoDict['en'] != ""):
          info = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (infoDict['en'])
+      elif (infoDict['it'] == infoDict['en'] == ""):
+         info = ""
 
       # Build Resource Privacy Pages
       if (privacyDict['it'] != "" and privacyDict['en'] != ""):
@@ -545,7 +551,8 @@ def main(argv):
          privacy = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>" % (privacyDict['it'])
       elif (privacyDict['it'] == "" and privacyDict['en'] != ""):
          privacy = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (privacyDict['en'])
-
+      elif (privacyDict['it'] == privacyDict['en'] == ""):
+         privacy = ""
 
       idp = OrderedDict([
         ('id',cont_id),
