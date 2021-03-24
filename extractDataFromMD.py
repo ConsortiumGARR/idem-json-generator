@@ -302,7 +302,7 @@ def main(argv):
    except getopt.GetoptError as err:
       print (str(err))
       print ("Usage: ./extractDataFromMD.py -m <md_inputfile> -o <output_path>")
-      print ("The JSON content will be put in the output directory")
+      print ("The idem-sps.json and idem-idps.json files will be put in the output directory")
       sys.exit(2)
 
    inputfile = None
@@ -311,7 +311,7 @@ def main(argv):
    for opt, arg in opts:
       if opt in ('-h', '--help'):
          print ("Usage: ./extractDataFromMD.py -m <md_inputfile> -o <output_path>")
-         print ("The JSON content will be put in the output directory")
+         print ("The idem-sps.json and idem-idps.json files will be put in the output directory")
          sys.exit()
       elif opt in ('-m', '--metadata'):
          inputfile = arg
@@ -322,7 +322,7 @@ def main(argv):
          _debug = 1
       else:
          print ("Usage: ./extractDataFromMD.py -m <md_inputfile> -o <output_path>")
-         print ("The JSON content will be put in the output directory")
+         print ("The idem-sps.json and idem-idps.json files will be put in the output directory")
          sys.exit()
 
    namespaces = {
