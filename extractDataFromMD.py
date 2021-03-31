@@ -290,7 +290,7 @@ def getContacts(EntityDescriptor,namespaces,contactType='technical'):
            if ctc.text.startswith("mailto:"):
               contactsList.append(ctc.text.replace("mailto:", ""))
            else:
-              contactList.append(ctc.text)
+              contactsList.append(ctc.text)
 
     return '<br/>'.join(contactsList)
 
