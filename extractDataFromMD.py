@@ -23,7 +23,7 @@ def getDescriptions(EntityDescriptor,namespaces,entType='idp'):
     if (entType.lower() == 'sp'):
        entityType = "./md:SPSSODescriptor"
 
-    descriptions = EntityDescriptor.findall("%s/md:Extensions/mdui:UIInfo/mdui:Description" % entityType, namespaces)
+    descriptions = EntityDescriptor.findall(f"{entityType}/md:Extensions/mdui:UIInfo/mdui:Description", namespaces)
 
     if (len(descriptions) != 0):
        for desc in descriptions:
@@ -45,7 +45,7 @@ def getLogoBig(EntityDescriptor,namespaces,entType='idp'):
        entityType = "./md:SPSSODescriptor"
     
     logoUrl = ""
-    logos = EntityDescriptor.findall("%s/md:Extensions/mdui:UIInfo/mdui:Logo[@xml:lang='it']" % entityType,namespaces)
+    logos = EntityDescriptor.findall(f"{entityType}/md:Extensions/mdui:UIInfo/mdui:Logo[@xml:lang='it']",namespaces)
     if (len(logos) != 0):
        for logo in logos:
            logoHeight = logo.get("height")
@@ -59,7 +59,7 @@ def getLogoBig(EntityDescriptor,namespaces,entType='idp'):
                  logoUrl = logo.text
                  return logoUrl
     else:
-       logos = EntityDescriptor.findall("%s/md:Extensions/mdui:UIInfo/mdui:Logo[@xml:lang='en']" % entityType,namespaces)
+       logos = EntityDescriptor.findall(f"{entityType}/md:Extensions/mdui:UIInfo/mdui:Logo[@xml:lang='en']", namespaces)
        if (len(logos) != 0):
           for logo in logos:
               logoHeight = logo.get("height")
@@ -73,7 +73,7 @@ def getLogoBig(EntityDescriptor,namespaces,entType='idp'):
                     logoUrl = logo.text
                     return logoUrl
        else:
-           logos = EntityDescriptor.findall("%s/md:Extensions/mdui:UIInfo/mdui:Logo" % entityType,namespaces)
+           logos = EntityDescriptor.findall(f"{entityType}/md:Extensions/mdui:UIInfo/mdui:Logo", namespaces)
            if (len(logos) != 0):
               for logo in logos:
                   logoHeight = logo.get("height")
@@ -99,7 +99,7 @@ def getLogoSmall(EntityDescriptor,namespaces,entType='idp'):
        entityType = "./md:SPSSODescriptor"
     
     logoUrl = ""
-    logos = EntityDescriptor.findall("%s/md:Extensions/mdui:UIInfo/mdui:Logo[@xml:lang='it']" % entityType,namespaces)
+    logos = EntityDescriptor.findall(f"{entityType}/md:Extensions/mdui:UIInfo/mdui:Logo[@xml:lang='it']", namespaces)
     if (len(logos) != 0):
        for logo in logos:
            logoHeight = logo.get("height")
@@ -113,7 +113,7 @@ def getLogoSmall(EntityDescriptor,namespaces,entType='idp'):
                  logoUrl = logo.text
                  return logoUrl
     else:
-       logos = EntityDescriptor.findall("%s/md:Extensions/mdui:UIInfo/mdui:Logo[@xml:lang='en']" % entityType,namespaces)
+       logos = EntityDescriptor.findall(f"{entityType}/md:Extensions/mdui:UIInfo/mdui:Logo[@xml:lang='en']", namespaces)
        if (len(logos) != 0):
           for logo in logos:
               logoHeight = logo.get("height")
@@ -127,7 +127,7 @@ def getLogoSmall(EntityDescriptor,namespaces,entType='idp'):
                     logoUrl = logo.text
                     return logoUrl
        else:
-           logos = EntityDescriptor.findall("%s/md:Extensions/mdui:UIInfo/mdui:Logo" % entityType,namespaces)
+           logos = EntityDescriptor.findall(f"{entityType}/md:Extensions/mdui:UIInfo/mdui:Logo", namespaces)
            if (len(logos) != 0):
               for logo in logos:
                   logoHeight = logo.get("height")
@@ -159,7 +159,7 @@ def getServiceName(EntityDescriptor,namespaces):
 
 # Get Organization Name
 def getOrganizationName(EntityDescriptor, namespaces,lang='it'):
-    orgName = EntityDescriptor.find("./md:Organization/md:OrganizationName[@xml:lang='%s']" % lang,namespaces)
+    orgName = EntityDescriptor.find(f"./md:Organization/md:OrganizationName[@xml:lang='{lang}']", namespaces)
 
     if (orgName != None):
        return orgName.text
@@ -175,12 +175,12 @@ def getDisplayName(EntityDescriptor, namespaces, entType='idp'):
     if (entType.lower() == 'sp'):
        entityType = "./md:SPSSODescriptor"
 
-    displayName = EntityDescriptor.find("%s/md:Extensions/mdui:DisplayName[@xml:lang='it']" % entityType,namespaces)
+    displayName = EntityDescriptor.find(f"{entityType}/md:Extensions/mdui:DisplayName[@xml:lang='it']", namespaces)
 
     if (displayName != None):
        return displayName.text
     else:
-       displayName = EntityDescriptor.find("%s/md:Extensions/mdui:DisplayName[@xml:lang='en']" % entityType,namespaces)
+       displayName = EntityDescriptor.find(f"{entityType}/md:Extensions/mdui:DisplayName[@xml:lang='en']", namespaces)
        if (displayName != None):
           return displayName.text
        else:
@@ -203,7 +203,7 @@ def getInformationURLs(EntityDescriptor,namespaces,entType='idp'):
     if (entType.lower() == 'sp'):
        entityType = "./md:SPSSODescriptor"
 
-    info_pages = EntityDescriptor.findall("%s/md:Extensions/mdui:UIInfo/mdui:InformationURL" % entityType, namespaces)
+    info_pages = EntityDescriptor.findall(f"{entityType}/md:Extensions/mdui:UIInfo/mdui:InformationURL", namespaces)
 
     info_dict = dict()
     for infop in info_pages:
@@ -227,7 +227,7 @@ def getPrivacyStatementURLs(EntityDescriptor,namespaces,entType='idp'):
     if (entType.lower() == 'sp'):
        entityType = "./md:SPSSODescriptor"
 
-    privacy_pages = EntityDescriptor.findall("%s/md:Extensions/mdui:UIInfo/mdui:PrivacyStatementURL" % entityType, namespaces)
+    privacy_pages = EntityDescriptor.findall(f"{entityType}/md:Extensions/mdui:UIInfo/mdui:PrivacyStatementURL", namespaces)
 
     privacy_dict = dict()
     for pp in privacy_pages:
@@ -245,12 +245,23 @@ def getPrivacyStatementURLs(EntityDescriptor,namespaces,entType='idp'):
 
 # Get OrganizationURL
 def getOrganizationURL(EntityDescriptor,namespaces,lang='it'):
-    orgUrl = EntityDescriptor.find("./md:Organization/md:OrganizationURL[@xml:lang='%s']" % lang,namespaces)
+    orgUrl = EntityDescriptor.find(f"./md:Organization/md:OrganizationURL[@xml:lang='{lang}']", namespaces)
 
     if (orgUrl != None):
        return orgUrl.text
     else:
        return ""
+
+# Get IdP Scopes
+def getScopes(EntityDescriptor,namespaces):
+    scopes = EntityDescriptor.findall("./md:IDPSSODescriptor/md:Extensions/shibmd:Scope", namespaces)
+
+    scopeList = list()
+
+    for scope in scopes:
+        scopeList.append(scope.text)
+
+    return scopeList
 
 
 # Get RequestedAttribute
@@ -292,7 +303,7 @@ def getContacts(EntityDescriptor,namespaces,contactType='technical'):
            else:
               contactList.append(ctc.text)
 
-    return '<br/>'.join(contactsList)
+    return ',<br/>'.join(contactsList)
 
 
 def main(argv):
@@ -387,6 +398,7 @@ def main(argv):
    #     },
    #     "info": "<a href='#_info-url-it_#'>IT</a>, <a href='#_info-url-en_#'>EN</a>",
    #     "privacy": "<a href='#_privacy-url-it_#'>IT</a>, <a href='#_privacy-url-en_#'>EN</a>"
+   #     "allTechSuppCtcs": "<email-technical-1>,<email-technical-2>,<email-support-1>,<email-support-2>"
    #   }
    # ]
    for EntityDescriptor in sp:
@@ -409,21 +421,21 @@ def main(argv):
 
       # Build Resource Info Pages
       if (infoDict['it'] != "" and infoDict['en'] != ""):
-         info = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>&nbsp;&nbsp;&nbsp;<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (infoDict['it'],infoDict['en'])
+         info = f"<a href='{infoDict['en']}' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>&nbsp;&nbsp;&nbsp;<a href='{infoDict['en']}' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>"
       elif (infoDict['it'] != "" and infoDict['en'] == ""):
-         info = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>" % (infoDict['it'])
+         info = f"<a href='{infoDict['it']}' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>"
       elif (infoDict['it'] == "" and infoDict['en'] != ""):
-         info = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (infoDict['en'])
+         info = f"<a href='{infoDict['en']}' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>"
       elif (infoDict['it'] == infoDict['en'] == ""):
          info = ""
 
       # Build Resource Privacy Pages
       if (privacyDict['it'] != "" and privacyDict['en'] != ""):
-         privacy = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>&nbsp;&nbsp;&nbsp;<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (privacyDict['it'],privacyDict['en'])
+         privacy = f"<a href='{privacyDict['it']}' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Privacy ITA' height='18' width='18' /></a>&nbsp;&nbsp;&nbsp;<a href='{privacyDict['en']}' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Privacy ENG' height='18' width='18' /></a>"
       elif (privacyDict['it'] != "" and privacyDict['en'] == ""):
-         privacy = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>" % (privacyDict['it'])
+         privacy = f"<a href='{privacyDict['it']}' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Privacy ITA' height='18' width='18' /></a>"
       elif (privacyDict['it'] == "" and privacyDict['en'] != ""):
-         privacy = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (privacyDict['en'])
+         privacy = f"<a href='{privacyDict['en']}' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Privacy ENG' height='18' width='18' /></a>"
       elif (privacyDict['it'] == privacyDict['en'] == ""):
          privacy = ""
 
@@ -441,7 +453,7 @@ def main(argv):
       if (orgUrl == ""):
          orgUrl = getOrganizationURL(EntityDescriptor,namespaces,'en')
      
-      orgName = "<a href='%s' target='_blank'>%s</a>" % (orgUrl,orgName)
+      orgName = f"<a href='{orgUrl}' target='_blank'>{orgName}</a>"
 
       # Get Contacts
       techContacts = getContacts(EntityDescriptor, namespaces, 'technical')
@@ -454,6 +466,15 @@ def main(argv):
          ('administrative', adminContacts),
       ])
 
+      if (techContacts and suppContacts):
+         allTechSuppCtcs = f"{techContacts},<br\>{suppContacts}"
+      elif (techContacts and not suppContacts):
+         allTechSuppCtcs = f"{techContacts}"
+      elif (not techContacts and suppContacts):
+         allTechSuppCtcs = f"{suppContacts}"
+      else:
+         allTechSuppCtcs = ""
+
       # Build SP JSON Dictionary
       sp = OrderedDict([
         ('id',cont_id),
@@ -463,12 +484,13 @@ def main(argv):
         ('entityID',entityID),
         ('resourceContacts',contacts),
         ('info', info),
-        ('privacy', privacy)
+        ('privacy', privacy),
+        ('allTechSuppCtcs', allTechSuppCtcs)
       ])     
 
       list_sps.append(sp)
 
-   result_sps = open("%s/idem-sps.json" % outputpath, "w",encoding=None)
+   result_sps = open(f"{outputpath}/idem-sps.json", "w",encoding=None)
    result_sps.write(json.dumps(sorted(list_sps,key=itemgetter('id')),sort_keys=False, indent=None, ensure_ascii=False,separators=(',', ':')))
    result_sps.close()
 
@@ -484,7 +506,7 @@ def main(argv):
    #    "entityID": "<entityID>",
    #    "orgName": "<nomeOrgLinked>",
    #    "contacts": {
-   #                  "technical" : ["<email-tecnichal>"],
+   #                  "technical" : ["<email-technical>"],
    #                  "support" : ["<email-support>"],
    #                  "administrative" : ["<email-administr>"]
    #                },
@@ -492,6 +514,11 @@ def main(argv):
    #    "privacy": "<privacyUrls>",
    #    "favicon": "<faviconUrl>",
    #    "logo": "<logoUrl>",
+   #    "allTechSuppCtcs": "<email-technical-1>,<email-technical-2>,<email-support-1>,<email-support-2>"
+   #    "scope": [
+   #              "scope1",
+   #              "scope2"
+   #             ]
    #  } 
    # ] 
    for EntityDescriptor in idp:
@@ -501,6 +528,9 @@ def main(argv):
       # Get entityID
       entityID = getEntityID(EntityDescriptor,namespaces)
 
+      # Get IdP scopes
+      scopes = getScopes(EntityDescriptor,namespaces)
+
       # Get DisplayName
       orgName = getDisplayName(EntityDescriptor, namespaces, 'idp')
 
@@ -509,7 +539,7 @@ def main(argv):
       if (orgUrl == ""):
          orgUrl = getOrganizationURL(EntityDescriptor,namespaces,'en')
      
-      orgName = "<a href='%s' target='_blank'>%s</a>" % (orgUrl,orgName)
+      orgName = f"<a href='{orgUrl}' target='_blank'>{orgName}</a>"
 
       # Get Logo URL
       logo = getLogoBig(EntityDescriptor, namespaces, 'idp')
@@ -528,6 +558,15 @@ def main(argv):
          ('administrative', adminContacts),
       ])
 
+      if (techContacts and suppContacts):
+         allTechSuppCtcs = f"{techContacts},<br>{suppContacts}"
+      elif (techContacts and not suppContacts):
+         allTechSuppCtcs = f"{techContacts}"
+      elif (not techContacts and suppContacts):
+         allTechSuppCtcs = f"{suppContacts}"
+      else:
+         allTechSuppCtcs = ""
+
       # Get InformationURL
       infoDict = getInformationURLs(EntityDescriptor, namespaces, 'idp')
 
@@ -536,21 +575,21 @@ def main(argv):
 
       # Build Resource Info Pages
       if (infoDict['it'] != "" and infoDict['en'] != ""):
-         info = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>&nbsp;&nbsp;&nbsp;<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (infoDict['it'],infoDict['en'])
+         info = f"<a href='{infoDict['it']}' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>&nbsp;&nbsp;&nbsp;<a href='{infoDict['en']}' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>"
       elif (infoDict['it'] != "" and infoDict['en'] == ""):
-         info = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>" % (infoDict['it'])
+         info = f"<a href='{infoDict['it']}' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>"
       elif (infoDict['it'] == "" and infoDict['en'] != ""):
-         info = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (infoDict['en'])
+         info = f"<a href='{infoDict['en']}' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>"
       elif (infoDict['it'] == infoDict['en'] == ""):
          info = ""
 
       # Build Resource Privacy Pages
       if (privacyDict['it'] != "" and privacyDict['en'] != ""):
-         privacy = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>&nbsp;&nbsp;&nbsp;<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (privacyDict['it'],privacyDict['en'])
+         privacy = f"<a href='{privacyDict['it']}' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Privacy ITA' height='18' width='18' /></a>&nbsp;&nbsp;&nbsp;<a href='{privacyDict['en']}' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Privacy ENG' height='18' width='18' /></a>"
       elif (privacyDict['it'] != "" and privacyDict['en'] == ""):
-         privacy = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>" % (privacyDict['it'])
+         privacy = f"<a href='{privacyDict['it']}' target='_blank'><img src='https://idem.garr.it/images/it.png' alt='Info ITA' height='18' width='18' /></a>"
       elif (privacyDict['it'] == "" and privacyDict['en'] != ""):
-         privacy = "<a href='%s' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>" % (privacyDict['en'])
+         privacy = f"<a href='{privacyDict['en']}' target='_blank'><img src='https://idem.garr.it/images/uk.png' alt='Info ENG' height='18' width='18' /></a>"
       elif (privacyDict['it'] == privacyDict['en'] == ""):
          privacy = ""
 
@@ -562,13 +601,15 @@ def main(argv):
         ('info', info),
         ('privacy', privacy),
         ('favicon', favicon),
-        ('logo', logo)
+        ('logo', logo),
+        ('allTechSuppCtcs', allTechSuppCtcs),
+        ('scopes', scopes)
       ])
 
       list_idps.append(idp)
 
    
-   result_idps = open("%s/idem-idps.json" % outputpath, "w",encoding=None)
+   result_idps = open(f"{outputpath}/idem-idps.json", "w",encoding=None)
    result_idps.write(json.dumps(sorted(list_idps,key=itemgetter('id')),sort_keys=False, indent=None, ensure_ascii=False,separators=(',', ':')))
    result_idps.close()
 
